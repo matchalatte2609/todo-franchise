@@ -64,7 +64,44 @@ app.delete('/todos/:id', async(req, res) => {
     }
     
 });
+// GET /health to check mongoose healthy state
+app.get('/health', (req, res) => {
+    // 1 - connected, 0 - disconnected
+    // 2 - connecting, 3 - disconnecting
+    const isConnected = mongoose.connection.readyState === 1;
+    if (isConnected) {
+        return res.status(200).json({
+            status: 'healthy',
+            db: 'connected'
+        });
+    } else {
+        return res.status(503).json({
+            status: 'unhealthy',
+            db: 'disconnected',
+            readyState: mongoose.connection.readyState
+        });
+    }
+});
 
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => app.listen(3000, () => console.log('Server & DB Ready')))
-    .catch(err => console.log(err));
+// a loop that tries 5 times with a 3-second delay between attempt
+const connectWithRetry = async (attempts = 5) => {
+    while (attempts > 0) {
+        try {
+            await mongoose.connect(process.env.MONGO_URI);
+            app.listen(3000, () => console.log('Server & DB ready'));
+            return;
+        } catch (err) {
+            attempts--;
+            console.error(`Connection failed. ${attempts} tries left. Error: ${err.message}`);
+
+            if (attempts === 0) {
+                console.error('Max retries reached. Exiting...');
+                process.exit(1);
+            }
+
+            await new Promise(res => setTimeout(res, 3000));
+        }
+    }
+}
+
+connectWithRetry();
