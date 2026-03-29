@@ -15,8 +15,6 @@ services:
       - "3000:3000"
     environment:
       - MONGO_URI=mongodb://database:27017/todos
-    volumes:
-      - ./src:/app/src
 
   database:
     image: mongo:latest
