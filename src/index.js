@@ -19,16 +19,51 @@ app.post('/todos', async (req, res) => {
     }
 });
 app.get('/todos', async (req, res) => {
-    const todos = await Todo.find();
-    res.json(todos);
-})
+    try {
+        const todos = await Todo.find();
+        res.json(todos);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+app.get('/todos/:id', async (req, res) => {
+    try {
+        const todo = await Todo.findById(req.params.id);
+        if (!todo) {
+            return res.status(404).json({ error: "Todo not found" });
+        }
+        res.json(todo);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
 app.put('/todos/:id', async (req, res) => {
-    const updatedTodo = await Todo.findByIdAndUpdate(req.params.id, req.body, { new: true});
-    res.json(updatedTodo);
+    try {
+        const updatedTodo = await Todo.findByIdAndUpdate(req.params.id, req.body, { new: true});
+        
+        if (!updatedTodo) {
+            return res.status(404).json({ error: "Todo not found"});
+        }
+
+        res.json(updatedTodo);
+    } catch (err) {
+        res.status(400).send();
+    }
+    
 });
 app.delete('/todos/:id', async(req, res) => {
-    await Todo.findByIdAndDelete(req.params.id);
-    res.json({ message: "Todo deleted successfully" });
+    try {
+        const deletedToDo = await Todo.findByIdAndDelete(req.params.id);
+        
+        if (!deletedToDo) {
+            return res.status(404).json({ error: "Todo not found"});
+        }
+
+        res.json({ message: "Todo deleted successfully" });
+    } catch (err) {
+        res.status(400).send();
+    }
+    
 });
 
 mongoose.connect(process.env.MONGO_URI)
