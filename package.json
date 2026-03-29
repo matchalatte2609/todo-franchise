@@ -1,0 +1,19 @@
+{
+  "name": "todo-franchise",
+  "version": "1.0.0",
+  "description": "A multi-container Todo API with Express and MongoDB",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^4.22.1",
+    "mongodb": "^7.1.1",
+    "mongoose": "^8.23.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
